@@ -3,13 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "appServiceAppName": {
-            "value": "jcasasusbicep"
+            "value": "jcasasus-final-exam"
         },
         "appServicePlanName": {
-            "value": "jcasasusbicep"
+            "value": "jcasasus-final-exam"
         },
-        "storageAccountName": {
-            "value": "jcasasusstoragebicep"
+        "storageAccountKind":{
+            "value": "StorageV2"
+        },
+        "storageAccountAccessTier":{
+            "value": "Hot"
         }
     }
 }

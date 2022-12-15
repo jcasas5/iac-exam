@@ -1,45 +1,48 @@
 @sys.description('The Web App name.')
 @minLength(3)
-@maxLength(24)
-param appServiceAppName string = 'jseijas-app-bicep'
+@maxLength(30)
+param appServiceAppName string = 'jcasasus-final- exam'
 @sys.description('The App Service Plan name.')
 @minLength(3)
 @maxLength(24)
-param appServicePlanName string = 'jseijas-app-bicep'
-@sys.description('The Storage Account name.')
-@minLength(3)
-@maxLength(24)
-param storageAccountName string = 'jseijasstorage'
-@allowed([
-  'nonprod'
-  'prod'
-  ])
-param environmentType string = 'nonprod'
+param appServicePlanName string = 'jcasasus-final-exam'
+@sys.description('The environment type.')
 param location string = resourceGroup().location
+var storageAccountSkuName = 'Standard_LRS'  
+var appServicePlanSkuName = 'B1'
 
-var storageAccountSkuName = (environmentType == 'prod') ? 'Standard_GRS' : 'Standard_LRS'  
+@allowed([
+  'StorageV2'
+  'BlobStorage'])
+param storageAccountKind string
+@allowed([
+  'Hot'
+  'Cool'
+])
+param storageAccountAccessTier string
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
-    name: storageAccountName
-    location: location
-    sku: {
-      name: storageAccountSkuName
-    }
-    kind: 'StorageV2'
-    properties: {
-      accessTier: 'Hot'
-    }
+resource appServicePlan 'Microsoft.Web/serverFarms@2022-03-01' = {
+  name: appServicePlanName
+  location: location
+  sku: {
+    name: appServicePlanSkuName
   }
-
-
-module appService 'modules/module.bicep' = {
-  name: 'appService'
-  params: { 
-    location: location
-    appServiceAppName: appServiceAppName
-    appServicePlanName: appServicePlanName
-    environmentType: environmentType
+}
+resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
+  name: appServiceAppName
+  location: location
+  properties: {
+  serverFarmId: appServicePlan.id
+  httpsOnly: true
   }
 }
 
-  output appServiceAppHostName string = appService.outputs.appServiceAppHostName
+module storageAccounts 'modules/module.bicep' = {
+  name: 'storageAccounts'
+  params: { 
+    location: location    
+    storageAccountSkuName: storageAccountSkuName
+    storageAccountAccessTier: storageAccountAccessTier
+    storageAccountKind: storageAccountKind
+  }
+}

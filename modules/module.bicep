@@ -1,47 +1,21 @@
 param location string = resourceGroup().location
-param appServiceAppName string
-param appServicePlanName string
-param dbhost string
-param dbuser string
-param dbpass string
-param dbname string
+@allowed([
+  'StorageV2'
+  'BlobStorage'])
+param storageAccountKind string
+@allowed([
+  'Hot'
+  'Cool'
+])
+param storageAccountAccessTier string
+param storageAccountSkuName string = 'Standard_LRS'
 
-var appServicePlanSkuName = 'B1'
-
-resource appServicePlan 'Microsoft.Web/serverFarms@2022-03-01' = {
-  name: appServicePlanName
+resource storageAccountResources 'Microsoft.Storage/storageAccounts@2021-09-01' = [for i in range(1,2): {
+  name: 'jcasasus-final-exam${i}'
   location: location
-  sku: {
-    name: appServicePlanSkuName
+  kind: storageAccountKind
+  sku: {name: storageAccountSkuName}
+  properties: {
+    accessTier: storageAccountAccessTier
   }
-}
-resource appServiceApp 'Microsoft.Web/sites@2022-03-01' = {
-name: appServiceAppName
-location: location
-properties: {
-  serverFarmId: appServicePlan.id
-  httpsOnly: true
-  siteConfig: {
-    appSettings: [
-      {
-        name: 'DBUSER'
-        value: dbuser
-      }
-      {
-        name: 'DBPASS'
-        value: dbpass
-      }
-      {
-        name: 'DBNAME'
-        value: dbname
-      }
-      {
-        name: 'DBHOST'
-        value: dbhost
-      }
-    ]
-  }
-  }
-}
-
-output appServiceAppHostName string = appServiceApp.properties.defaultHostName
+}]
